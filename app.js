@@ -3,7 +3,7 @@ const CONFIG = {
     letterPool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
     colors: ['#00ffaa', '#ff6b9d', '#ffd93d', '#6bcfff', '#c77dff', '#ff5e78'],
     maxLetters: 30,
-    defaultFontSize: 80,
+    defaultFontSize: 200,
     trailLength: 15,
     physics: {
         friction: 0.95,
@@ -284,12 +284,13 @@ class TypographySandbox {
     }
 
     setupUI() {
-        document.getElementById('add-letter-btn').addEventListener('click', () => {
-            this.addRandomLetter();
-        });
-
-        document.getElementById('clear-btn').addEventListener('click', () => {
-            this.letters = [];
+        // Keyboard shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (e.key === ' ') {
+                this.addRandomLetter();
+            } else if (e.key === 'c') {
+                this.letters = [];
+            }
         });
     }
 
@@ -307,7 +308,7 @@ class TypographySandbox {
 
     addInitialLetters() {
         const word = "HELLO";
-        const spacing = 100;
+        const spacing = 220;
         const startX = this.canvas.width / 2 - (word.length * spacing) / 2;
         const startY = this.canvas.height / 2;
 
@@ -315,7 +316,7 @@ class TypographySandbox {
             const letter = new Letter(
                 word[i],
                 startX + i * spacing,
-                startY + Math.sin(i) * 30
+                startY + Math.sin(i) * 50
             );
             this.letters.push(letter);
         }
@@ -347,9 +348,6 @@ class TypographySandbox {
             });
             this.video.srcObject = stream;
 
-            document.getElementById('camera-text').textContent = 'Camera active';
-            document.getElementById('camera-status').classList.remove('loading');
-
             this.camera = new Camera(this.video, {
                 onFrame: async () => {
                     await this.hands.send({ image: this.video });
@@ -360,15 +358,10 @@ class TypographySandbox {
             this.camera.start();
         } catch (error) {
             console.error('Camera error:', error);
-            document.getElementById('camera-text').textContent = 'Camera error';
         }
     }
 
     onHandsDetected(results) {
-        const handCount = results.multiHandLandmarks ? results.multiHandLandmarks.length : 0;
-        document.getElementById('hands-text').textContent =
-            handCount > 0 ? `${handCount} hand${handCount > 1 ? 's' : ''} detected` : 'No hands detected';
-
         // Clear previous cursors
         this.handCursors.forEach((cursor) => cursor.remove());
         this.handCursors.clear();
@@ -451,7 +444,7 @@ class TypographySandbox {
 
     applySingleHandGestures(gesture, position, swipe, handLabel) {
         this.letters.forEach(letter => {
-            const isNear = letter.isNear(position.x, position.y, 150);
+            const isNear = letter.isNear(position.x, position.y, 250);
 
             if (gesture.isPinching && isNear) {
                 // Grab and move
@@ -466,20 +459,32 @@ class TypographySandbox {
             }
 
             if (gesture.isOpen && isNear) {
-                // Stretch letters
-                letter.targetScaleX = 1.5;
-                letter.targetScaleY = 1.5;
-                letter.targetFontSize = CONFIG.defaultFontSize * 1.3;
-                letter.shadow = 20;
+                // Stretch letters - horizontal stretch for wide movements
+                const dx = Math.abs(position.x - letter.x);
+                const dy = Math.abs(position.y - letter.y);
+
+                if (dx > dy) {
+                    // Horizontal stretch
+                    letter.targetScaleX = 2.0;
+                    letter.targetScaleY = 0.8;
+                } else {
+                    // Vertical stretch
+                    letter.targetScaleX = 0.8;
+                    letter.targetScaleY = 2.0;
+                }
+
+                letter.targetFontSize = CONFIG.defaultFontSize * 1.2;
+                letter.shadow = 25;
 
                 // Cycle colors
                 letter.hue = (letter.hue + 2) % 360;
                 letter.color = `hsl(${letter.hue}, 80%, 60%)`;
             } else if (gesture.isClosed && isNear) {
-                // Compress letters
-                letter.targetScaleX = 0.6;
-                letter.targetScaleY = 0.6;
-                letter.targetFontSize = CONFIG.defaultFontSize * 0.7;
+                // Compress letters - squish dramatically
+                letter.targetScaleX = 0.4;
+                letter.targetScaleY = 0.4;
+                letter.targetFontSize = CONFIG.defaultFontSize * 0.5;
+                letter.shadow = 15;
             } else if (!letter.grabbed) {
                 // Reset to normal
                 letter.targetScaleX = 1;
@@ -515,17 +520,19 @@ class TypographySandbox {
                     Math.pow(letter.y - centerY, 2)
                 );
 
-                if (distToCenter < 250) {
+                if (distToCenter < 400) {
                     // Pull letters toward center
                     const dx = centerX - letter.x;
                     const dy = centerY - letter.y;
-                    letter.applyForce(dx * 0.01, dy * 0.01);
-                    letter.shadow = 25;
+                    letter.applyForce(dx * 0.015, dy * 0.015);
+                    letter.shadow = 30;
+                    letter.targetScaleX = 0.7;
+                    letter.targetScaleY = 0.7;
                 }
             });
         }
 
-        // Both hands open - ripple effect
+        // Both hands open - ripple effect and stretch
         if (hand1.gesture.isOpen && hand2.gesture.isOpen) {
             this.letters.forEach(letter => {
                 const distToCenter = Math.sqrt(
@@ -533,19 +540,23 @@ class TypographySandbox {
                     Math.pow(letter.y - centerY, 2)
                 );
 
-                if (distToCenter < 300) {
-                    letter.ripple = 1.5;
+                if (distToCenter < 450) {
+                    letter.ripple = 2.0;
 
                     // Push letters away from center
                     const dx = letter.x - centerX;
                     const dy = letter.y - centerY;
                     const angle = Math.atan2(dy, dx);
-                    letter.applyForce(Math.cos(angle) * 2, Math.sin(angle) * 2);
+                    letter.applyForce(Math.cos(angle) * 3, Math.sin(angle) * 3);
+
+                    // Stretch based on distance from hands
+                    letter.targetScaleX = 1.5;
+                    letter.targetScaleY = 1.5;
                 }
             });
         }
 
-        // One open, one closed - rotate
+        // One open, one closed - rotate and squish
         if ((hand1.gesture.isOpen && hand2.gesture.isClosed) ||
             (hand1.gesture.isClosed && hand2.gesture.isOpen)) {
             this.letters.forEach(letter => {
@@ -554,9 +565,19 @@ class TypographySandbox {
                     Math.pow(letter.y - centerY, 2)
                 );
 
-                if (distToCenter < 250) {
-                    letter.targetRotation += 0.1;
-                    letter.shadow = 20;
+                if (distToCenter < 400) {
+                    letter.targetRotation += 0.15;
+                    letter.shadow = 25;
+
+                    // Alternate squish direction
+                    const rotAmount = Math.floor(letter.targetRotation / (Math.PI / 2)) % 2;
+                    if (rotAmount === 0) {
+                        letter.targetScaleX = 1.3;
+                        letter.targetScaleY = 0.7;
+                    } else {
+                        letter.targetScaleX = 0.7;
+                        letter.targetScaleY = 1.3;
+                    }
                 }
             });
         }
