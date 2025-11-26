@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Typography Sandbox</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="container">
+        <!-- Main canvas for typography -->
+        <canvas id="canvas"></canvas>
+
+        <!-- Hidden video element for webcam -->
+        <video id="video" autoplay playsinline></video>
+
+        <!-- UI Overlay -->
+        <div id="ui-overlay">
+            <div id="status-panel">
+                <div id="camera-status">📷 <span id="camera-text">Initializing camera...</span></div>
+                <div id="hands-status">✋ <span id="hands-text">No hands detected</span></div>
+            </div>
+
+            <div id="gesture-indicators">
+                <div class="gesture-indicator" id="left-hand-indicator">
+                    <span class="hand-label">Left Hand</span>
+                    <span class="gesture-name">-</span>
+                </div>
+                <div class="gesture-indicator" id="right-hand-indicator">
+                    <span class="hand-label">Right Hand</span>
+                    <span class="gesture-name">-</span>
+                </div>
+            </div>
+
+            <div id="controls-panel">
+                <h3>Controls</h3>
+                <ul>
+                    <li><strong>Open Hand:</strong> Stretch letters</li>
+                    <li><strong>Closed Fist:</strong> Compress letters</li>
+                    <li><strong>Pinch:</strong> Grab & move letters</li>
+                    <li><strong>Swipe:</strong> Fling letters with trails</li>
+                    <li><strong>Two Hands:</strong> Merge, rotate, ripple</li>
+                </ul>
+                <button id="add-letter-btn">Add Letter</button>
+                <button id="clear-btn">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

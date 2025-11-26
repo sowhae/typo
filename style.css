@@ -1,0 +1,199 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    overflow: hidden;
+    background: #0a0a0a;
+    color: #ffffff;
+}
+
+#container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    cursor: none;
+}
+
+#video {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 200px;
+    height: 150px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    transform: scaleX(-1);
+    opacity: 0.8;
+    z-index: 10;
+}
+
+#ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#status-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#status-panel > div {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+#gesture-indicators {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.gesture-indicator {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 12px 18px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 180px;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.gesture-indicator.active {
+    opacity: 1;
+    border-color: rgba(0, 255, 170, 0.6);
+    box-shadow: 0 0 20px rgba(0, 255, 170, 0.3);
+}
+
+.hand-label {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.gesture-name {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #00ffaa;
+}
+
+#controls-panel {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 280px;
+    pointer-events: all;
+}
+
+#controls-panel h3 {
+    margin-bottom: 12px;
+    font-size: 16px;
+    color: #00ffaa;
+}
+
+#controls-panel ul {
+    list-style: none;
+    margin-bottom: 15px;
+}
+
+#controls-panel li {
+    font-size: 12px;
+    margin: 6px 0;
+    color: #ccc;
+}
+
+#controls-panel strong {
+    color: #fff;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    background: rgba(0, 255, 170, 0.2);
+    border: 1px solid rgba(0, 255, 170, 0.4);
+    color: #00ffaa;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    pointer-events: all;
+}
+
+button:hover {
+    background: rgba(0, 255, 170, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 170, 0.4);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Hand cursor visualization */
+.hand-cursor {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #00ffaa;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+    transition: all 0.1s ease;
+    box-shadow: 0 0 20px rgba(0, 255, 170, 0.6);
+}
+
+.hand-cursor.pinching {
+    background: rgba(0, 255, 170, 0.5);
+    width: 15px;
+    height: 15px;
+}
+
+.hand-cursor.closed {
+    background: rgba(255, 100, 100, 0.5);
+    border-color: #ff6464;
+    box-shadow: 0 0 20px rgba(255, 100, 100, 0.6);
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+#camera-status.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
